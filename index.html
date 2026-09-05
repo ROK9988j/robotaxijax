@@ -1,0 +1,321 @@
+<title>Cybercab Watch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Saira:wght@500;600;700&family=Saira+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+  :root{
+    --bg:#EFF2F5; --surface:#FFFFFF; --surface-2:#F5F8FA; --border:#DBE1E7;
+    --text:#0F151A; --muted:#5A646E; --faint:#8A939C;
+    --accent:#E5241A; --accent-ink:#FFFFFF; --glow:rgba(229,36,26,.18);
+    --live:#128A42; --pending:#A96C05; --flag:#C33222;
+    --live-bg:rgba(18,138,66,.12); --pending-bg:rgba(169,108,5,.12); --flag-bg:rgba(195,50,34,.10);
+    --shadow:0 1px 2px rgba(16,24,32,.06),0 8px 24px rgba(16,24,32,.06);
+    --shadow-lead:0 1px 2px rgba(16,24,32,.08),0 18px 40px rgba(229,36,26,.10);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --bg:#0B0E11; --surface:#14181D; --surface-2:#1A2027; --border:#28303890;
+      --text:#EAEEF2; --muted:#9AA4AE; --faint:#6B757F;
+      --accent:#FF4A3D; --accent-ink:#160604; --glow:rgba(255,74,61,.30);
+      --live:#37C86D; --pending:#E4A82A; --flag:#FF6154;
+      --live-bg:rgba(55,200,109,.14); --pending-bg:rgba(228,168,42,.14); --flag-bg:rgba(255,97,84,.12);
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 30px rgba(0,0,0,.35);
+      --shadow-lead:0 1px 2px rgba(0,0,0,.5),0 22px 46px rgba(255,74,61,.16);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#0B0E11; --surface:#14181D; --surface-2:#1A2027; --border:#283038;
+    --text:#EAEEF2; --muted:#9AA4AE; --faint:#6B757F;
+    --accent:#FF4A3D; --accent-ink:#160604; --glow:rgba(255,74,61,.30);
+    --live:#37C86D; --pending:#E4A82A; --flag:#FF6154;
+    --live-bg:rgba(55,200,109,.14); --pending-bg:rgba(228,168,42,.14); --flag-bg:rgba(255,97,84,.12);
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 12px 30px rgba(0,0,0,.35);
+    --shadow-lead:0 1px 2px rgba(0,0,0,.5),0 22px 46px rgba(255,74,61,.16);
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:"IBM Plex Sans",system-ui,-apple-system,sans-serif;
+    line-height:1.55; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1120px; margin:0 auto; padding:28px 20px 64px}
+  a{color:inherit}
+
+  /* Masthead */
+  .mast{display:flex; justify-content:space-between; align-items:flex-start; gap:20px; flex-wrap:wrap;
+    border-bottom:1px solid var(--border); padding-bottom:22px}
+  .eyebrow{font-family:"Saira Condensed","Saira",sans-serif; font-weight:700; letter-spacing:.22em;
+    text-transform:uppercase; font-size:12px; color:var(--accent); display:flex; align-items:center; gap:8px}
+  .eyebrow .dot{width:7px; height:7px; border-radius:50%; background:var(--accent); box-shadow:0 0 0 4px var(--glow)}
+  h1{font-family:"Saira",sans-serif; font-weight:700; font-size:clamp(34px,6vw,58px);
+    line-height:.98; letter-spacing:-.01em; margin:10px 0 0; text-wrap:balance}
+  .read{margin:14px 0 0; max-width:60ch; font-size:16px; color:var(--muted)}
+  .read b{color:var(--text); font-weight:600}
+  .metaline{margin-top:14px; font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--faint);
+    display:flex; gap:14px; flex-wrap:wrap; align-items:center}
+  .metaline .sep{opacity:.5}
+  .toggle{flex:none; font-family:"IBM Plex Mono",monospace; font-size:12px; letter-spacing:.04em;
+    background:var(--surface); color:var(--muted); border:1px solid var(--border); border-radius:999px;
+    padding:8px 14px; cursor:pointer}
+  .toggle:hover{color:var(--text)}
+  .toggle:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+
+  /* KPI cluster */
+  .cluster{display:grid; grid-template-columns:repeat(auto-fit,minmax(168px,1fr)); gap:12px; margin:26px 0}
+  .tile{background:var(--surface); border:1px solid var(--border); border-radius:14px; padding:16px 16px 14px;
+    box-shadow:var(--shadow); display:flex; flex-direction:column; gap:6px; min-height:118px}
+  .tile .k{font-family:"Saira Condensed","Saira",sans-serif; letter-spacing:.14em; text-transform:uppercase;
+    font-size:11px; color:var(--faint)}
+  .tile .v{font-family:"Saira",sans-serif; font-weight:700; font-size:34px; line-height:1;
+    font-variant-numeric:tabular-nums; letter-spacing:-.01em}
+  .tile .v small{font-size:15px; color:var(--muted); font-weight:600}
+  .tile .sub{font-size:12.5px; color:var(--muted); margin-top:auto}
+  .tile.accent{border-color:color-mix(in srgb,var(--accent) 45%,var(--border))}
+  .tile.accent .v{color:var(--accent)}
+
+  .pill{display:inline-flex; align-items:center; gap:6px; align-self:flex-start;
+    font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600; letter-spacing:.03em;
+    padding:3px 9px; border-radius:999px; border:1px solid transparent}
+  .pill.live{color:var(--live); background:var(--live-bg); border-color:color-mix(in srgb,var(--live) 30%,transparent)}
+  .pill.pending{color:var(--pending); background:var(--pending-bg); border-color:color-mix(in srgb,var(--pending) 30%,transparent)}
+  .pill.flag{color:var(--flag); background:var(--flag-bg); border-color:color-mix(in srgb,var(--flag) 30%,transparent)}
+  .pdot{width:7px;height:7px;border-radius:50%;background:currentColor}
+  .pill.live .pdot{width:7px;height:7px;border-radius:50%;background:var(--live);
+    box-shadow:0 0 0 0 var(--live); animation:pulse 2.2s infinite}
+  @keyframes pulse{0%{box-shadow:0 0 0 0 color-mix(in srgb,var(--live) 55%,transparent)}
+    70%{box-shadow:0 0 0 6px transparent}100%{box-shadow:0 0 0 0 transparent}}
+  @media (prefers-reduced-motion:reduce){.pill.live .pdot{animation:none}}
+
+  /* Main grid */
+  .grid{display:grid; grid-template-columns:1.7fr 1fr; gap:22px; align-items:start}
+  @media (max-width:860px){.grid{grid-template-columns:1fr}}
+  .sechead{font-family:"Saira Condensed","Saira",sans-serif; font-weight:700; text-transform:uppercase;
+    letter-spacing:.12em; font-size:13px; color:var(--muted); margin:6px 0 12px;
+    display:flex; align-items:center; gap:10px}
+  .sechead::after{content:""; flex:1; height:1px; background:var(--border)}
+
+  /* Lead card */
+  .lead{background:var(--surface); border:1px solid color-mix(in srgb,var(--accent) 40%,var(--border));
+    border-radius:16px; padding:20px 20px 18px; box-shadow:var(--shadow-lead); position:relative; overflow:hidden}
+  .lead::before{content:""; position:absolute; inset:0 0 auto 0; height:3px;
+    background:linear-gradient(90deg,var(--accent),color-mix(in srgb,var(--accent) 30%,transparent))}
+  .lead .tag{margin-bottom:10px}
+  .lead h2{font-family:"Saira",sans-serif; font-weight:700; font-size:24px; line-height:1.12;
+    margin:0 0 8px; letter-spacing:-.01em; text-wrap:balance}
+  .lead p{margin:0; color:var(--muted); font-size:15px}
+
+  /* Feed list */
+  .feed{margin-top:18px; display:flex; flex-direction:column}
+  .item{padding:18px 0; border-top:1px solid var(--border); display:flex; flex-direction:column; gap:7px}
+  .item:first-child{border-top:none}
+  .item h3{font-family:"Saira",sans-serif; font-weight:600; font-size:18px; line-height:1.2; margin:0; letter-spacing:-.005em}
+  .item p{margin:0; color:var(--muted); font-size:14.5px}
+  .tag{display:inline-flex; align-items:center; gap:7px; font-family:"IBM Plex Mono",monospace;
+    font-size:10.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--faint)}
+  .tag .sq{width:8px;height:8px;border-radius:2px}
+  .tag.robo .sq{background:var(--accent)} .tag.tesla .sq{background:var(--pending)} .tag.av .sq{background:var(--faint)}
+  .src{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--faint); display:flex; gap:6px; flex-wrap:wrap}
+  .src a{color:var(--accent); text-decoration:none; border-bottom:1px solid transparent}
+  .src a:hover{border-bottom-color:currentColor}
+  .note{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--pending)}
+
+  /* Market rail */
+  .rail{background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:var(--shadow)}
+  .rail h2{font-family:"Saira",sans-serif; font-weight:700; font-size:17px; margin:0 0 4px; letter-spacing:-.005em}
+  .rail .caption{font-size:12.5px; color:var(--faint); margin:0 0 14px}
+  .newflag{background:var(--accent); color:var(--accent-ink); border-radius:10px; padding:11px 12px; margin-bottom:16px}
+  .newflag .l{font-family:"IBM Plex Mono",monospace; font-size:10.5px; font-weight:600; letter-spacing:.12em; opacity:.85}
+  .newflag .t{font-family:"Saira",sans-serif; font-weight:600; font-size:14.5px; line-height:1.25; margin-top:3px}
+  .mgroup{font-family:"Saira Condensed","Saira",sans-serif; font-weight:700; text-transform:uppercase;
+    letter-spacing:.14em; font-size:11px; color:var(--faint); margin:16px 0 8px}
+  .mrow{display:flex; align-items:center; justify-content:space-between; gap:10px; padding:9px 0;
+    border-top:1px solid var(--border)}
+  .mrow:first-of-type{border-top:none}
+  .mrow .city{font-weight:500; font-size:14.5px}
+  .mrow .city span{display:block; font-size:11.5px; color:var(--faint); font-weight:400}
+
+  footer{margin-top:40px; border-top:1px solid var(--border); padding-top:18px;
+    font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--faint); display:flex;
+    flex-direction:column; gap:8px}
+  footer .row{display:flex; gap:16px; flex-wrap:wrap}
+  footer a{color:var(--muted); text-decoration:none} footer a:hover{color:var(--text)}
+  .preview{background:var(--pending-bg); color:var(--pending); border:1px solid color-mix(in srgb,var(--pending) 30%,transparent);
+    border-radius:8px; padding:8px 12px; font-family:"IBM Plex Mono",monospace; font-size:11.5px; align-self:flex-start}
+
+  /* Video */
+  .video{grid-column:1/-1; margin-top:6px}
+  .vcard{display:flex; align-items:center; gap:16px; background:var(--surface-2); border:1px solid var(--border);
+    border-radius:14px; padding:14px 16px; text-decoration:none; color:inherit}
+  .vcard:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--border))}
+  .play{flex:none; width:46px; height:46px; border-radius:50%; background:var(--accent); color:var(--accent-ink);
+    display:grid; place-items:center; box-shadow:0 0 0 6px var(--glow)}
+  .play svg{width:18px;height:18px; margin-left:2px}
+  .vcard .vt{font-family:"Saira",sans-serif; font-weight:600; font-size:16px}
+  .vcard .vm{font-family:"IBM Plex Mono",monospace; font-size:11.5px; color:var(--faint); margin-top:2px}
+  .vcard .ext{margin-left:auto; font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--faint); flex:none}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div>
+      <div class="eyebrow"><span class="dot"></span> Daily Robotaxi Brief</div>
+      <h1>Cybercab Watch</h1>
+      <p class="read">Tesla put driverless Cybercabs on public streets in Austin and named the next five metros. <b>The robotaxi race just turned into a land grab.</b></p>
+      <div class="metaline">
+        <span>2026-09-05</span><span class="sep">/</span>
+        <span>window: last 24h</span><span class="sep">/</span>
+        <span>focus: Cybercab &amp; Robotaxi</span>
+      </div>
+    </div>
+    <button class="toggle" id="themeBtn" aria-label="Toggle light and dark theme">◐ theme</button>
+  </header>
+
+  <section class="cluster" aria-label="Status at a glance">
+    <div class="tile accent">
+      <div class="k">Markets live</div>
+      <div class="v">2</div>
+      <div class="sub">Austin &middot; SF Bay Area</div>
+    </div>
+    <div class="tile">
+      <div class="k">Next markets</div>
+      <div class="v">5</div>
+      <div class="sub">announced, permits pending</div>
+    </div>
+    <div class="tile">
+      <div class="k">Austin safety operators</div>
+      <div class="v" style="font-size:22px">Removing</div>
+      <span class="pill pending"><span class="dot"></span>target: by year-end</span>
+    </div>
+    <div class="tile">
+      <div class="k">Fleet target (EOY)</div>
+      <div class="v">~1,500 <small>cars</small></div>
+      <span class="pill pending"><span class="dot"></span>Musk target, unverified</span>
+    </div>
+    <div class="tile">
+      <div class="k">Cybercab</div>
+      <div class="v" style="font-size:20px">No wheel</div>
+      <div class="sub">no pedals &middot; 2 seats &middot; purpose-built</div>
+    </div>
+  </section>
+
+  <div class="grid">
+    <main>
+      <div class="sechead">Robotaxi &amp; Cybercab</div>
+
+      <article class="lead">
+        <span class="tag robo"><span class="sq"></span> Lead &middot; Sep 3</span>
+        <h2>Cybercab hits Austin streets with no steering wheel and no pedals</h2>
+        <p>Tesla launched its purpose-built two-seat Cybercab in Austin, and clips shared on X show the cars moving through public streets with no one behind the wheel. The debut came at an invite-only event that surprised fans expecting a public rollout. Pricing and public-ride availability were held back for a follow-up event. Independent ride data is not yet out, so range and safety numbers remain Tesla's own.</p>
+        <div class="src">source:
+          <a href="https://www.motor1.com/news/805874/tesla-cybercab-robotaxi-launch-austin/">Motor1</a>
+          <a href="https://qz.com/tesla-cybercab-driverless-robotaxi-austin-090326">Quartz</a>
+          <a href="https://www.forbes.com/sites/brookecrothers/2026/09/03/tesla-cybercab-launches-with-closed-event-surprising-some-fans/">Forbes</a>
+        </div>
+      </article>
+
+      <div class="feed">
+        <article class="item">
+          <span class="tag robo"><span class="sq"></span> Expansion &middot; Sep 4</span>
+          <h3>Five metros named next: Las Vegas, Phoenix, Dallas, Houston, Miami</h3>
+          <p>Tesla says months of behind-the-scenes permitting work is underway to launch in the five new regions. No firm launch dates were given. Current driverless-passenger service remains Austin and the San Francisco Bay Area.</p>
+          <div class="src">source: <a href="https://driveteslacanada.ca/news/tesla-announces-five-new-markets-robotaxi-will-expand-to-next/">Drive Tesla</a></div>
+        </article>
+
+        <article class="item">
+          <span class="tag robo"><span class="sq"></span> Operations &middot; Sep 4</span>
+          <h3>Austin set to drop onboard safety operators; fleet targeted near 1,500</h3>
+          <p>Tesla plans to move Austin to fully driverless service with no onboard operators before year-end, though the removal may be limited to parts of the geofence at first. Musk put the end-of-year fleet at roughly 1,500 vehicles.</p>
+          <div class="note">Target and fleet figure are company statements, not confirmed deliveries.</div>
+          <div class="src">source: <a href="https://driveteslacanada.ca/news/tesla-announces-five-new-markets-robotaxi-will-expand-to-next/">Drive Tesla</a></div>
+        </article>
+      </div>
+
+      <div class="sechead" style="margin-top:30px">Tesla, broadly</div>
+      <div class="feed">
+        <article class="item">
+          <span class="tag tesla"><span class="sq"></span> Analysis &middot; Sep 3</span>
+          <h3>Tesla still trails Waymo, and robotaxi economics are unproven</h3>
+          <p>Coverage of the launch stressed that Tesla remains behind Waymo on driverless miles and paid public rides, in a business no operator has yet shown to be profitable. Treat the launch as a capability milestone, not a revenue one.</p>
+          <div class="src">source: <a href="https://www.cnn.com/2026/09/03/business/tesla-robotaxi-cybercab-self-driving-cars">CNN Business</a></div>
+        </article>
+      </div>
+
+      <div class="sechead" style="margin-top:30px">One from the wider field</div>
+      <div class="feed">
+        <article class="item">
+          <span class="tag av"><span class="sq"></span> Autonomous vehicles &middot; Sep 1</span>
+          <h3>Waymo goes live in San Diego, Tampa and Denver; Zoox starts Houston and San Diego testing</h3>
+          <p>Waymo opened driverless service in three more metros, including its first in Colorado. Amazon's Zoox began on-road testing in Houston and San Diego with human safety drivers aboard.</p>
+          <div class="src">source: <a href="https://techstartups.com/2026/09/01/waymo-expands-robotaxi-service-to-3-more-u-s-cities-as-zoox-and-tesla-race-to-catch-up/">Tech Startups</a> <a href="https://www.cnbc.com/2026/09/01/waymo-and-zoox-expand-into-more-us-markets-as-robotaxi-race-heats-up.html">CNBC</a></div>
+        </article>
+      </div>
+
+      <div class="video">
+        <div class="sechead" style="margin-top:28px">Watch</div>
+        <a class="vcard" href="https://qz.com/tesla-cybercab-driverless-robotaxi-austin-090326">
+          <span class="play"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></span>
+          <span>
+            <span class="vt">Cybercab driving driverless through Austin</span>
+            <span class="vm">clips shared during the Sep 3 launch</span>
+          </span>
+          <span class="ext">opens externally &#8599;</span>
+        </a>
+      </div>
+    </main>
+
+    <aside class="rail" aria-label="Market tracker">
+      <h2>Market tracker</h2>
+      <p class="caption">Where Robotaxi carries passengers today, and what is next.</p>
+
+      <div class="newflag">
+        <div class="l">NEW THIS CYCLE</div>
+        <div class="t">Purpose-built Cybercab now carrying riders in Austin (Sep 3)</div>
+      </div>
+
+      <div class="mgroup">Live now</div>
+      <div class="mrow">
+        <div class="city">Austin, TX <span>going fully driverless</span></div>
+        <span class="pill live"><span class="pdot"></span>Live</span>
+      </div>
+      <div class="mrow">
+        <div class="city">SF Bay Area, CA <span>safety monitor aboard</span></div>
+        <span class="pill live"><span class="pdot"></span>Live</span>
+      </div>
+
+      <div class="mgroup">Announced next</div>
+      <div class="mrow"><div class="city">Las Vegas, NV</div><span class="pill pending"><span class="dot"></span>Pending</span></div>
+      <div class="mrow"><div class="city">Phoenix, AZ</div><span class="pill pending"><span class="dot"></span>Pending</span></div>
+      <div class="mrow"><div class="city">Dallas, TX</div><span class="pill pending"><span class="dot"></span>Pending</span></div>
+      <div class="mrow"><div class="city">Houston, TX</div><span class="pill pending"><span class="dot"></span>Pending</span></div>
+      <div class="mrow"><div class="city">Miami, FL</div><span class="pill pending"><span class="dot"></span>Pending</span></div>
+    </aside>
+  </div>
+
+  <footer>
+    <div class="row">
+      <span>Last built 2026-09-05</span>
+      <span>Window: last 24 hours</span>
+      <span>Sources: primary where available</span>
+    </div>
+    <div class="row">
+      <a href="https://www.tesla.com/robotaxi">Tesla Robotaxi</a>
+      <a href="https://driveteslacanada.ca/news/tesla-announces-five-new-markets-robotaxi-will-expand-to-next/">Expansion</a>
+      <a href="https://www.cnn.com/2026/09/03/business/tesla-robotaxi-cybercab-self-driving-cars">Context</a>
+    </div>
+  </footer>
+</div>
+
+<script>
+  (function(){
+    var btn=document.getElementById('themeBtn');
+    btn.addEventListener('click',function(){
+      var cur=document.documentElement.getAttribute('data-theme');
+      var next;
+      if(cur==='dark'){next='light';}
+      else if(cur==='light'){next='dark';}
+      else{ next=window.matchMedia&&window.matchMedia('(prefers-color-scheme:dark)').matches?'light':'dark'; }
+      document.documentElement.setAttribute('data-theme',next);
+    });
+  })();
+</script>
